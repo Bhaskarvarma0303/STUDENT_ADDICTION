@@ -86,9 +86,12 @@ class RandomImputer(BaseEstimator,TransformerMixin):
 """
 
 def create_preprocessor(df,age_column='age',target='addicted_label',imp_strategy='mean',scaling=True):
+    print(df.columns)
     if target in df.columns.tolist():
         df=df.drop(columns=[target])
     num_cols,cat_cols=seperate_dtypes(df)
+    print(num_cols)
+    print(cat_cols)
     if age_column in num_cols:
         num_cols.remove(age_column)
     transformers=[]

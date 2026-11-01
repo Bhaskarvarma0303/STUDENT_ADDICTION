@@ -85,23 +85,25 @@ class RandomImputer(BaseEstimator,TransformerMixin):
 - scale the numerical columns
 """
 
-def create_preprocessor(df,age_column='age',target='addicted_label',imp_strategy='mean'):
+def create_preprocessor(df,age_column='age',target='addicted_label',imp_strategy='mean',scaling=True):
+    if target in df.columns.tolist():
+        df=df.drop(columns=[target])
     num_cols,cat_cols=seperate_dtypes(df)
     if age_column in num_cols:
         num_cols.remove(age_column)
     transformers=[]
     ##age_column pipeline
     if age_column in df.columns:
-        age_pipeline=Pipeline([
-           ("imputer",RandomImputer()),
-            ("scaler",StandardScaler())
-        ])
+        age_steps=[('imputer',RandomImputer())]
+        if scaling:
+            age_steps.append(('scaling',StandardScaler()))
+        age_pipeline=Pipeline(age_steps)
         transformers.append(('age_pipe',age_pipeline,[age_column]))
     if num_cols:
-        num_pipeline=Pipeline([
-            ('imputer',SimpleImputer(strategy=imp_strategy)),
-            ('scaler',StandardScaler())
-        ])
+        num_steps=[('imputer',SimpleImputer(strategy=imp_strategy))]
+        if scaling:
+            num_steps.append(('scaler',StandardScaler()))
+        num_pipeline=Pipeline(num_steps)
         transformers.append(('num_pipe',num_pipeline,num_cols))
     if cat_cols:
         cat_pipeline=Pipeline([
